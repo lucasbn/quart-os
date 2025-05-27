@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  baremetal-app:
+    build: .
+    stdin_open: true
+    tty: true
+    # Mount source files for development
+    volumes:
+      - .:/app
+    # Enable privileged mode for QEMU
+    privileged: true
