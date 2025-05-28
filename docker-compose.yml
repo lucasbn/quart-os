@@ -1,12 +1,11 @@
-version: '3.8'
-
 services:
-  baremetal-app:
+  bare-metal-app:
     build: .
+    container_name: qemu-bare-metal
     stdin_open: true
     tty: true
-    # Mount source files for development
     volumes:
       - .:/app
-    # Enable privileged mode for QEMU
-    privileged: true
+    working_dir: /app
+    privileged: false
+    network_mode: host

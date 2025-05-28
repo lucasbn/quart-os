@@ -1,109 +1,60 @@
-# Bare Metal x86 Program with Docker
+I want this project to start at the beginning.
 
-This project creates a simple bare-metal C program that runs directly on QEMU x86 emulator. The program computes 2+2 and outputs the result via UART.
+We're going to use qemu to emulate a CPU that supports/implements the x86_64
+instruction set.
 
-## What it does
+So we have our CPU. The question now becomes: how on earth do we tell the CPU to
+execute instructions?
 
-- Boots from a custom bootloader
-- Switches from 16-bit real mode to 32-bit protected mode
-- Initializes UART communication
-- Computes 2 + 2 = 4
-- Outputs the result via serial port (UART)
-- All containerized with Docker for cross-platform compatibility
-
-## Files Structure
+Let's figure this out by diving into qemu internals.
 
 ```
-├── main.c              # Main C program with computation logic
-├── boot.s              # Assembly bootloader
-├── linker.ld           # Linker script
-├── Makefile            # Build configuration
-├── Dockerfile          # Container setup
-├── docker-compose.yml  # Container orchestration
-└── README.md          # This file
+cd submodules/qemu
+mkdir build
+cd build
+../configure --target-list=x86_64-softmmu --enable-debug
+make
 ```
 
-## Prerequisites
+You should now have an executable file 'qemu-system-x86_64'. Go ahead an execute
+that with './qemu-system-x86_64 -nographic'.
 
-- Docker
-- Docker Compose (optional, but recommended)
-
-## Quick Start
-
-### Option 1: Using Docker Compose (Recommended)
-
-1. Clone or create all the files in a directory
-2. Run the application:
-   ```bash
-   docker-compose up --build
-   ```
-
-### Option 2: Using Docker directly
-
-1. Build the Docker image:
-   ```bash
-   docker build -t baremetal-app .
-   ```
-
-2. Run the container:
-   ```bash
-   docker run -it baremetal-app
-   ```
-
-## Expected Output
-
-You should see output similar to:
 ```
-Computing 2 + 2...
-Result: 4
-Program completed successfully!
+SeaBIOS (version rel-1.16.3-0-ga6ed6b701f0a-prebuilt.qemu.org)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+06FD0FC0+06F30FC0 CA00
+
+
+
+Booting from Hard Disk...
+Boot failed: could not read the boot disk
+
+Booting from Floppy...
+Boot failed: could not read the boot disk
+
+Booting from DVD/CD...
+Boot failed: Could not read from CDROM (code 0003)
+Booting from ROM...
+iPXE (PCI 00:03.0) starting execution...ok
+iPXE initialising devices...ok
+
+
+
+iPXE 1.20.1+ (g4bd0) -- Open Source Network Boot Firmware -- http://ipxe.org
+Features: DNS HTTP iSCSI TFTP AoE ELF MBOOT PXE bzImage Menu PXEXT
+
+net0: 52:54:00:12:34:56 using 82540em on 0000:00:03.0 (open)
+  [Link:up, TX:0 TXE:0 RX:0 RXE:0]
+Configuring (net0 52:54:00:12:34:56)................. No configuration methods s
+ucceeded (http://ipxe.org/040ee119)
+No more network devices
+
+No bootable device.
 ```
 
-## How it Works
+We see a few things here that we should take note of:
 
-1. **Boot Process**: The `boot.s` assembly file creates a bootloader that:
-   - Sets up the initial environment
-   - Switches from 16-bit real mode to 32-bit protected mode
-   - Sets up a Global Descriptor Table (GDT)
-   - Calls the C main function
-
-2. **Main Program**: The `main.c` file:
-   - Initializes UART communication on COM1 port
-   - Performs the calculation (2 + 2)
-   - Converts the result to a string
-   - Outputs via UART
-
-3. **QEMU Emulation**: The program runs on QEMU's x86 system emulator with serial output redirected to stdio
-
-## Development
-
-To modify the program:
-
-1. Edit the source files
-2. Rebuild and run:
-   ```bash
-   docker-compose up --build
-   ```
-
-## Technical Details
-
-- **Target Architecture**: x86 (32-bit)
-- **Boot Method**: Legacy BIOS boot sector
-- **Output Method**: UART serial communication (38400 baud)
-- **Build Tools**: GCC cross-compiler, GNU binutils
-- **Emulator**: QEMU system emulator
-
-## Troubleshooting
-
-- If you see "Permission denied" errors, make sure Docker has the necessary permissions
-- On some systems, you might need to run Docker commands with `sudo`
-- The container needs privileged mode for QEMU to work properly
-
-## Cross-Platform Compatibility
-
-This setup works on:
-- macOS (including M1/M2/M3 Macs)
-- Linux
-- Windows (with Docker Desktop)
-
-The Docker container handles all the cross-compilation details automatically.
+- SeaBIOS
+- 'Booting from X'
+- iPXE
