@@ -1,19 +1,18 @@
     .code16
 
 start:
-    mov ax, 0x07C0       ; set up segment registers
-    mov ds, ax
-    mov es, ax
-    xor bx, bx           ; ES:BX = 0000:0000 buffer
-    mov dl, 0x80         ; BIOS disk 0x80 = first hard disk
+	sub ax, ax
+	mov ds, ax
+	mov ss, ax
+	mov esp, 0xf000
 
     ; Make register si point to the start of the partition table
-    mov si, 0x01BE
+    mov si, 0x7dbe
     mov cx, 4
 
 check_part:
-    ; Check if the partition type is 0x01, if not then check the next partition
-    cmp byte [si+4], 0x01
+    ; Check if the partition type is 0x20, if not then check the next partition
+    cmp byte [si+4], 0x20
     jne next_part
 
     ; Check if the partition is bootable, if not then check next partition
@@ -31,44 +30,37 @@ next_part:
     int 0x18
 
 load_kernel:
-    call    puts
-    db      0x0d, "Loading kernel...", 0x0d, 0
+	mov ebx, [si+8]
+	mov ax, [si+12]
 
-    ; We know the partition has 128 sectors each of which are 512 bytes, so lets
-    ; just 
+    ; Allocate space for the DAP on the stack (16 bytes)
+    push 0
+    push 0
+    push ebx
+    push 0x2000
+    push 0
+    push ax
+    push 16
 
-hang:
-    jmp hang
+    ; Prepare the other arguments
+    mov si, sp
+    mov ah, 0x42
+    mov dl, 0x80
 
-; --------------------
+    ; Make the BIOS interrupt call
+    int 0x13
+    jc disk_error
 
-puts:
-    xchg    si, [ss:esp]        ; Get return address (string pointer) into SI
-    push    ax                  ; Save AX
-.next_char:
-    mov     al, [cs:si]         ; Load character from code segment
-    inc     si                  ; Advance string pointer
-    test    al, al              ; Test for null terminator
-    jz      .done               ; Jump if null (end of string)
-    call    putc                ; Print character
-    jmp     .next_char          ; Continue with next character
-.done:
-    pop     ax                  ; Restore AX
-    xchg    si, [ss:esp]        ; Put updated return address back
-    ret                         ; Return to byte after null terminator
-putc:
-    pusha                       ; Save all general-purpose registers
-    
-    sub     bh, bh              ; Page 0
-    mov     ah, 0x0e            ; Teletype output service
-    int     0x10                ; BIOS video interrupt
-    
-    cmp     al, 0x0d            ; Check for carriage return
-    jne     .exit               ; Not CR, we're done
-    mov     al, 0x0a            ; Load line feed character
-    mov     ah, 0x0e            ; Teletype output service again
-    int     0x10                ; Output the line feed
-    
-.exit:
-    popa                        ; Restore all general-purpose registers
-    ret                         ; Return to caller
+    ; Pop the DAP off the stack
+    add sp, 16
+
+    ; Jump to kernel
+    jmp 0x2000:0x0000
+
+    nop
+
+; Handle disk error (error code stored in AH) by informing BIOS that
+; the boot failed
+disk_error:
+    add sp, 16
+    int 0x18

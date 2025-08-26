@@ -40,7 +40,7 @@ if __name__ == "__main__":
     pt = PartitionTable()
     pt.add_partition(PartitionEntry(ptype=0x01, start_lba=1, num_sectors=128, bootable=True))
     pt.add_partition(PartitionEntry(ptype=0x02, start_lba=128, num_sectors=128, bootable=False))
-    pt.add_partition(PartitionEntry(ptype=0x03, start_lba=256, num_sectors=128, bootable=False))
+    pt.add_partition(PartitionEntry(ptype=0x20, start_lba=256, num_sectors=128, bootable=True))
     pt.add_partition(PartitionEntry(ptype=0x04, start_lba=385, num_sectors=128, bootable=False))
     
     # Write bytes directly to stdout
