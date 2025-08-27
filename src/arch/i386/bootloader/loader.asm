@@ -55,7 +55,10 @@ load_kernel:
     add sp, 16
 
     ; Jump to kernel
-    jmp 0x2000:0x0000
+    mov ax, 0x2000
+    mov es, ax
+    mov ds, ax
+    jmp 0x2000:0x0080
 
     nop
 

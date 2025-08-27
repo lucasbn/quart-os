@@ -1,44 +1,24 @@
-SRC_DIR := src
-BUILD_DIR := build
-IMAGES_DIR := images
+ARCH           ?= i386
 
-LOADER_SRC := $(SRC_DIR)/loader.asm
-LOADER_BIN := $(BUILD_DIR)/loader.bin
-PARTITION_BIN := $(BUILD_DIR)/partition-table.bin
-DISK_IMG := $(IMAGES_DIR)/disk.dsk
+BUILD_DIR      ?= $(abspath build)
+ARCH_BUILD_DIR ?= $(BUILD_DIR)/arch/$(ARCH)
 
-.PHONY: all loader disk run clean
+SRC_DIR        := src
+ARCH_SRC_DIR   := $(SRC_DIR)/arch/$(ARCH)
 
-all: disk
+CC = gcc
 
-$(BUILD_DIR):
-	mkdir -p $@
+C_SRCS := $(wildcard $(SRC_DIR)/kernel/*.c)
+C_OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(C_SRCS:.c=.o))
 
-$(IMAGES_DIR):
-	mkdir -p $@
+.PHONY: all clean
 
-$(LOADER_BIN): $(LOADER_SRC) | $(BUILD_DIR)
-# 	A binary file for booting with qemu
-	nasm -f bin $< -o $@
-#   An elf file with debug symbols for gdb
-	nasm -f elf32 -g -F dwarf src/loader.asm -o build/loader.o
-	ld -m elf_i386 -T loader.ld -o build/loader.elf build/loader.o
+all: $(C_OBJS)
+	$(MAKE) -C $(ARCH_SRC_DIR) BUILD_DIR=$(ARCH_BUILD_DIR)
 
-$(PARTITION_BIN): scripts/create-partition-table.py | $(BUILD_DIR)
-	python3 $< > $@
-
-$(DISK_IMG): $(LOADER_BIN) $(PARTITION_BIN) | $(IMAGES_DIR)
-	dd if=/dev/zero of=$@ bs=512 count=2880
-	dd if=$(LOADER_BIN) of=$@ conv=notrunc
-	dd if=$(PARTITION_BIN) of=$@ conv=notrunc bs=1 seek=446
-	dd if=test.bin of=$@ conv=notrunc bs=512 seek=256
-
-disk: $(DISK_IMG)
-
-run: $(DISK_IMG)
-	qemu-system-i386 -hda $< -nographic -monitor null -net none
-debug: $(DISK_IMG)
-	qemu-system-i386 -hda $< -nographic -monitor null -net none -s -S
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR) $(IMAGES_DIR)
+	rm -rf $(BUILD_DIR)
