@@ -61,7 +61,6 @@ another section on this with more info).
 
 ## x86 modes
 
-
 ### Real Mode
 
 Real mode allows a i386 CPU to run 16 bit programs. It exists for backward
@@ -133,3 +132,56 @@ stop a malicious task from accessing/modifying data of another task.
 There is no support for virtual memory.
 
 ### Protected Mode
+
+A really good article on protected mode can be found
+[here](https://web.archive.org/web/20030604185154/http://home.swipnet.se/smaffy/asm/info/embedded_pmode.pdf),
+particularly good if you already have some understanding of operating systems.
+
+**Memory Addressing**
+
+In protected mode, we have three types of tables that are stored in main memory:
+global descriptor table (GDT), local descriptor table (LDT) and the interrupt
+descriptor table (IDT).
+
+Each table consists of a series of entries that look like:
+
+![](assets/i386_protected_descriptor_entry.png)
+
+The important elements of the entry are the base and the limit.
+
+Each segment register points to one entry in one of these tables, and in turn
+these entries are used to translate logical entries in linear physical
+addresses as shown below.
+
+![](assets/i386_protected_memory_addressing.png)
+
+In words, when an instruction is executed a segment register is chosen (in the
+same way as in real mode) which points to an entry in either the GDT or the LDT.
+This entry specifies a base physical address which the offset is added to to get
+the linear physical address of the memory location being accessed. The limit is
+used to restrict which linear physical addresses can be accessed via the offset.
+
+I'm deliberatly avoiding going into detail here for a few reasons:
+
+- Modern operating systems do not use the LDT and use a small GDT that just
+  allows for a flat/direct memory access
+- The natural coevolution between CPU design and OS design means that explaining
+  the purpose of the LDT requires some pre-requisite knowledge about operating
+  systems, and I want this to be "self-contained"
+
+We need to know about this because ultimately the CPU MMU requires that there is
+a minimal GDT setup (even if that always results in flat memory accesses).
+Therefore, our bootloader will need to set this up when it transitions to
+protected mode.
+
+**Hardware Protections**
+
+The protections that the GDT/LDT segmentation model offers is all about
+preventing tasks from accessing/modifying things they shouldn't. At this point,
+we haven't covered the concept of a task so there's not much point digging into
+that further for now.
+
+**Paging**
+
+Again, an understanding of paging isn't needed to get to the point we want so we
+don't talk about it.
