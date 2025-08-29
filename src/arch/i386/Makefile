@@ -11,24 +11,27 @@ PARTITION_SCRIPT := bootloader/scripts/create-partition-table.py
 
 all: $(BUILD_DIR)/kernel.bin
 
-$(BUILD_DIR)/bootloader/loader.o: bootloader/loader.asm bootloader/loader.ld
+$(BUILD_DIR)/bootloader/loader.o: bootloader/loader.asm
 	@mkdir -p $(dir $@)
 	$(AS) -f elf32 -g -F dwarf $< -o $@
-	$(LD) -m elf_i386 -T bootloader/loader.ld -o $(BUILD_DIR)/bootloader/loader.elf $@
+
+$(BUILD_DIR)/bootloader/loader.elf: $(BUILD_DIR)/bootloader/loader.o bootloader/loader.ld
+	@mkdir -p $(dir $@)
+	$(LD) -m elf_i386 -T bootloader/loader.ld -o $@ $<
+
+# First sector, contains custom bootloader and partition table
+$(BUILD_DIR)/bootloader/loader.bin: $(BUILD_DIR)/bootloader/loader.elf $(PARTITION_SCRIPT)
+	@mkdir -p $(dir $@)
+	objcopy -O binary $< $@
+	python3 $(PARTITION_SCRIPT) | dd of=$@ bs=1 seek=446 conv=notrunc
 
 $(BUILD_DIR)/%.o: %.asm
 	@mkdir -p $(dir $@)
 	$(AS) -f elf32 -g -F dwarf $< -o $@
 
-$(BUILD_DIR)/start.elf: $(BUILD_DIR)/start.o
+$(BUILD_DIR)/start.elf: $(BUILD_DIR)/start.o linker.ld
 	@mkdir -p $(dir $@)
 	$(LD) -m elf_i386 -T linker.ld -o $@ $(BUILD_DIR)/start.o
-
-# First sector, contains custom bootloader and partition table
-$(BUILD_DIR)/bootloader/loader.bin: bootloader/loader.asm $(BUILD_DIR)/bootloader/loader.o $(PARTITION_SCRIPT)
-	@mkdir -p $(dir $@)
-	$(AS) -f bin $< -o $@
-	python3 $(PARTITION_SCRIPT) | dd of=$@ bs=1 seek=446 conv=notrunc
 
 # Main kernel binary
 $(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/start.elf $(BUILD_DIR)/bootloader/loader.bin

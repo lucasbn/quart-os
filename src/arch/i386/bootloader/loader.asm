@@ -1,4 +1,4 @@
-    .code16
+[BITS 16]
 
 start:
 	sub ax, ax
@@ -54,16 +54,63 @@ load_kernel:
     ; Pop the DAP off the stack
     add sp, 16
 
-    ; Jump to kernel
-    mov ax, 0x2000
-    mov es, ax
-    mov ds, ax
-    jmp 0x2000:0x0080
-
-    nop
+    ; Switch to protected mode
+    jmp protected_mode
 
 ; Handle disk error (error code stored in AH) by informing BIOS that
 ; the boot failed
 disk_error:
     add sp, 16
     int 0x18
+
+protected_mode:
+    cli
+    xor ax, ax
+    mov ds, ax
+    
+    ; Load GDT using absolute 32-bit address
+    lgdt [gdt_desc]
+    
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    
+    ; Far jump with absolute address
+    jmp 0x0008:clear_pipe
+
+[BITS 32]
+clear_pipe:
+    mov ax, 10h     ; Use data segment selector (0x10)
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+hang:
+    jmp hang
+
+align 8
+gdt:
+gdt_null:
+    dq 0
+gdt_code:
+    dw 0FFFFh       ; Limit 0-15
+    dw 0            ; Base 0-15  
+    db 0            ; Base 16-23
+    db 10011010b    ; Access byte: Present, Ring 0, Code, Executable, Readable
+    db 11001111b    ; Flags + Limit 16-19: 4KB granularity, 32-bit
+    db 0            ; Base 24-31
+
+gdt_data:
+    dw 0FFFFh       ; Limit 0-15
+    dw 0            ; Base 0-15
+    db 0            ; Base 16-23  
+    db 10010010b    ; Access byte: Present, Ring 0, Data, Writable
+    db 11001111b    ; Flags + Limit 16-19: 4KB granularity, 32-bit
+    db 0            ; Base 24-31
+gdt_end:
+
+gdt_desc:
+    dw gdt_end - gdt - 1    ; Limit
+    dd gdt                  ; Base address
