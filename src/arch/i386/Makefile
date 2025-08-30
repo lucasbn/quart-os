@@ -1,16 +1,23 @@
-ASM_SRCS := start.asm
+ASM_SRCS := $(wildcard src/*.asm)
 ASM_SRCS += bootloader/loader.asm
 ASM_OBJS := $(addprefix $(BUILD)/,$(ASM_SRCS:.asm=.o))
+
+C_SRCS := console.c
+C_OBJS := $(addprefix $(BUILD)/,$(C_SRCS:.c=.o))
 
 PARTITION_SCRIPT := bootloader/scripts/create-partition-table.py
 
 .PHONY: all
 
-all: $(ASM_OBJS) $(BUILD)/bootloader/loader.bin
+all: $(ASM_OBJS) $(C_OBJS) $(BUILD)/bootloader/loader.bin
 
 $(BUILD)/%.o: %.asm
 	@mkdir -p $(dir $@)
 	$(AS) -f elf32 -g -F dwarf $< -o $@
+
+$(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -g -m32 -ffreestanding -c $< -o $@
 
 # ---------------------------------------------------------------------------
 

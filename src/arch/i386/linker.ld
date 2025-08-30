@@ -1,8 +1,9 @@
-OUTPUT_FORMAT(elf32-i386)
+/* OUTPUT_FORMAT(elf32-i386) */
 ENTRY(kmain)
 
 INPUT (
     build/kernel/main.o
+    build/arch/i386/console.o
 )
 
 SECTIONS
