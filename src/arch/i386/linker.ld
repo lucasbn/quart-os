@@ -1,4 +1,9 @@
-ENTRY(start)
+OUTPUT_FORMAT(elf32-i386)
+ENTRY(kmain)
+
+INPUT (
+    build/kernel/main.o
+)
 
 SECTIONS
 {
@@ -6,7 +11,4 @@ SECTIONS
     .text : { *(.text*) }
     .data : { *(.data*) }
     .bss  : { *(.bss*) }
-
-    /* Do not discard debug info */
-    /* Keep .debug_info, .debug_line, etc. */
 }

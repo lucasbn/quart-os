@@ -1,24 +1,28 @@
 ARCH           ?= i386
 
-BUILD_DIR      ?= $(abspath build)
-ARCH_BUILD_DIR ?= $(BUILD_DIR)/arch/$(ARCH)
-
 SRC_DIR        := src
-ARCH_SRC_DIR   := $(SRC_DIR)/arch/$(ARCH)
+KERNEL_SRC	   := $(SRC_DIR)/kernel
+ARCH_SRC   := $(SRC_DIR)/arch/$(ARCH)
+
+BUILD          ?= $(abspath build)
+KERNEL_BUILD   ?= $(BUILD)/kernel
+ARCH_BUILD     ?= $(BUILD)/arch/$(ARCH)
 
 CC = gcc
+AS = nasm
+LD = ld
+LD_MODE = elf_i386
 
-C_SRCS := $(wildcard $(SRC_DIR)/kernel/*.c)
-C_OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(C_SRCS:.c=.o))
+include $(KERNEL_SRC)/Makefile
 
-.PHONY: all clean
+all: $(ARCH_BUILD)/kernel.bin
 
-all: $(C_OBJS)
-	$(MAKE) -C $(ARCH_SRC_DIR) BUILD_DIR=$(ARCH_BUILD_DIR)
+arch:
+	$(MAKE) -C $(ARCH_SRC) BUILD=$(ARCH_BUILD) CC=$(CC) AS=$(AS) LD=$(LD)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(dir $@)
-	$(CC) -c $< -o $@
+$(ARCH_BUILD)/kernel.bin: $(KERNEL_OBJS) arch
+	$(LD) -m $(LD_MODE) -T $(ARCH_SRC)/linker.ld -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD)
+

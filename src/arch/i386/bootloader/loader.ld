@@ -6,7 +6,4 @@ SECTIONS
     .text : { *(.text*) }
     .data : { *(.data*) }
     .bss  : { *(.bss*) }
-
-    /* Do not discard debug info */
-    /* Keep .debug_info, .debug_line, etc. */
 }

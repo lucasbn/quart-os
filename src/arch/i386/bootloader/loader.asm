@@ -87,8 +87,9 @@ clear_pipe:
     mov fs, ax
     mov gs, ax
 
-hang:
-    jmp hang
+    ; Jump to kernel start code
+    mov eax, [0x20018]
+    jmp eax
 
 align 8
 gdt:
