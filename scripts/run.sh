@@ -1,4 +1,4 @@
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ARCH_BUILD_DIR=$SCRIPT_DIR/../build/arch/i386
 DISK_DIR=$ARCH_BUILD_DIR/disk.dsk
 

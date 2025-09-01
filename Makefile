@@ -8,10 +8,10 @@ BUILD          ?= $(abspath build)
 KERNEL_BUILD   ?= $(BUILD)/kernel
 ARCH_BUILD     ?= $(BUILD)/arch/$(ARCH)
 
-CC = gcc
-CFLAGS = -g -m32 -ffreestanding -O2 -Wall -MMD -MP
+CC = i686-elf-gcc
+CFLAGS = -g -ffreestanding -O2 -Wall -MMD -MP
 AS = nasm
-LD = ld
+LD = i686-elf-ld
 LD_MODE = elf_i386
 
 export CC CFLAGS AS LD

@@ -32,5 +32,5 @@ $(BUILD)/bootloader/loader.elf: $(BUILD)/bootloader/loader.o bootloader/loader.l
 
 $(BUILD)/bootloader/loader.bin: $(BUILD)/bootloader/loader.elf $(PARTITION_SCRIPT)
 	@mkdir -p $(dir $@)
-	objcopy -O binary $< $@
+	i686-elf-objcopy -O binary $< $@
 	python3 $(PARTITION_SCRIPT) | dd of=$@ bs=1 seek=446 conv=notrunc
