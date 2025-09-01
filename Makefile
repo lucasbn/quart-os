@@ -12,7 +12,7 @@ CC             := i686-elf-gcc
 AS             := nasm
 LD             := i686-elf-ld
 
-CFLAGS         := -g -ffreestanding -O2 -Wall -MMD -MP
+CFLAGS         := -g -ffreestanding -O0 -Wall -MMD -MP
 
 all: $(ARCH_BUILD)/kernel.bin
 

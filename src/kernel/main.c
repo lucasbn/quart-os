@@ -16,7 +16,10 @@ void kprint(const char* str)
 void kmain(void) {
     intr_init();
 
-    __asm__ volatile ("int $0x0");
+    int output = 10 / 0;
+    if (output > 0) {
+        kprint("\nDivide by zero!");
+    }
 
     kprint("\nLucas was here!");
     for (;;) {}
