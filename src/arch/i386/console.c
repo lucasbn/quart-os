@@ -1,8 +1,7 @@
 #include "io.h"
 
-#define COM1 0x3F8
-
 static inline int is_transmit_empty() {
+    // __asm__ volatile("nop");
     return inb(COM1 + 5) & 0x20;
 }
 

@@ -1,2 +1,7 @@
 build/
 images/
+
+*.o
+*.elf
+*.bin
+*.dsk

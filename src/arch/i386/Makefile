@@ -1,36 +1,16 @@
-ASM_SRCS := $(wildcard src/*.asm)
-ASM_SRCS += bootloader/loader.asm
-ASM_OBJS := $(addprefix $(BUILD)/,$(ASM_SRCS:.asm=.o))
+ARCH_ASM_SRCS := $(wildcard *.asm)
+ARCH_ASM_OBJS := $(addprefix $(ARCH_BUILD)/,$(ARCH_ASM_SRCS:.asm=.o))
 
-C_SRCS := console.c
-C_OBJS := $(addprefix $(BUILD)/,$(C_SRCS:.c=.o))
-C_DEPS := $(addprefix $(BUILD)/,$(C_SRCS:.c=.d))
+ARCH_C_SRCS := console.c
+ARCH_C_OBJS := $(addprefix $(ARCH_BUILD)/,$(ARCH_C_SRCS:.c=.o))
+ARCH_C_DEPS := $(addprefix $(ARCH_BUILD)/,$(ARCH_C_SRCS:.c=.d))
 
-PARTITION_SCRIPT := bootloader/scripts/create-partition-table.py
-
-.PHONY: all
-
-all: $(ASM_OBJS) $(C_OBJS) $(BUILD)/bootloader/loader.bin
-
-$(BUILD)/%.o: %.asm
+$(ARCH_BUILD)/%.o: $(ARCH_SRC)/%.asm
 	@mkdir -p $(dir $@)
 	$(AS) -f elf32 -g -F dwarf $< -o $@
 
-$(BUILD)/%.o: %.c
+$(ARCH_BUILD)/%.o: $(ARCH_SRC)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
--include $(C_DEPS)
-
-# ---------------------------------------------------------------------------
-
-# Bootloader targets
-# TODO: Move into bootloader/ subdir
-$(BUILD)/bootloader/loader.elf: $(BUILD)/bootloader/loader.o bootloader/loader.ld
-	@mkdir -p $(dir $@)
-	$(LD) -m elf_i386 -T bootloader/loader.ld -o $@ $<
-
-$(BUILD)/bootloader/loader.bin: $(BUILD)/bootloader/loader.elf $(PARTITION_SCRIPT)
-	@mkdir -p $(dir $@)
-	i686-elf-objcopy -O binary $< $@
-	python3 $(PARTITION_SCRIPT) | dd of=$@ bs=1 seek=446 conv=notrunc
+-include $(ARCH_C_DEPS)
