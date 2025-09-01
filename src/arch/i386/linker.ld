@@ -3,7 +3,9 @@ ENTRY(kmain)
 
 INPUT (
     build/kernel/main.o
+    
     build/arch/i386/console.o
+    build/arch/i386/interrupt.o
 )
 
 SECTIONS

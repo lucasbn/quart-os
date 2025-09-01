@@ -14,6 +14,10 @@ void kprint(const char* str)
 }
 
 void kmain(void) {
+    intr_init();
+
+    __asm__ volatile ("int $0x0");
+
     kprint("\nLucas was here!");
     for (;;) {}
 }
