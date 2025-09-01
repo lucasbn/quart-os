@@ -4,6 +4,7 @@ ASM_OBJS := $(addprefix $(BUILD)/,$(ASM_SRCS:.asm=.o))
 
 C_SRCS := console.c
 C_OBJS := $(addprefix $(BUILD)/,$(C_SRCS:.c=.o))
+C_DEPS := $(addprefix $(BUILD)/,$(C_SRCS:.c=.d))
 
 PARTITION_SCRIPT := bootloader/scripts/create-partition-table.py
 
@@ -17,7 +18,9 @@ $(BUILD)/%.o: %.asm
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) -g -m32 -ffreestanding -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
+
+-include $(C_DEPS)
 
 # ---------------------------------------------------------------------------
 

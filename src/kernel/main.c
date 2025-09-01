@@ -1,4 +1,4 @@
-extern void serial_write(char c);
+#include "main.h"
 
 void putchar(char c) {
     if (c == '\n') serial_write('\r');

@@ -39,3 +39,13 @@ Problem: a sector is only 512 bytes, so we can't write very sophisticated
 programs here.
 
 Problem: real mode (?)
+
+---
+
+Some things I want to consider in this:
+
+- Bootloader: getting a hello world kernel
+- Interrupts
+- Memory management: internal kernel malloc/free
+- File-system support (?)
+- Running code at different privilege levels (?)
