@@ -67,7 +67,29 @@ protected_mode:
     cli
     xor ax, ax
     mov ds, ax
+
+    ; Enable A20 line
+.wait:
+    in al, 0x64
+    test al, 2
+    jnz .wait
+
+    mov al, 0xD1
+    out 0x64, al 
+
+.wait2:
+    in al, 0x64
+    test al, 2
+    jnz .wait2
+
+    mov al, 0xDF
+    out 0x60, al
     
+.wait3:
+    in al, 0x64
+    test al, 2
+    jnz .wait3
+
     ; Load GDT using absolute 32-bit address
     lgdt [gdt_desc]
     

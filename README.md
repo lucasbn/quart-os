@@ -46,6 +46,6 @@ Some things I want to consider in this:
 
 - Bootloader: getting a hello world kernel
 - Interrupts
-- Memory management: internal kernel malloc/free
-- File-system support (?)
+- Internal memory management: kernel malloc/free
 - Running code at different privilege levels (?)
+- File-system support (?)

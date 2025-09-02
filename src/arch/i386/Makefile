@@ -1,4 +1,4 @@
-ARCH_ASM_SRCS := $(wildcard *.asm)
+ARCH_ASM_SRCS := intr_stubs.asm
 ARCH_ASM_OBJS := $(addprefix $(ARCH_BUILD)/,$(ARCH_ASM_SRCS:.asm=.o))
 
 ARCH_C_SRCS := console.c interrupt.c

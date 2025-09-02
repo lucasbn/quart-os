@@ -9,3 +9,5 @@ static inline unsigned char inb(unsigned short port) {
     __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
+
+void serial_write(char c);

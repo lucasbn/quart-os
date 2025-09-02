@@ -1,4 +1,3 @@
-/* OUTPUT_FORMAT(elf32-i386) */
 ENTRY(kmain)
 
 INPUT (
@@ -6,6 +5,7 @@ INPUT (
     
     build/arch/i386/console.o
     build/arch/i386/interrupt.o
+    build/arch/i386/intr_stubs.o
 )
 
 SECTIONS
