@@ -3,7 +3,7 @@ ENTRY(kmain)
 INPUT (
     build/kernel/main.o
     
-    build/arch/i386/console.o
+    build/arch/i386/serial.o
     build/arch/i386/interrupt.o
     build/arch/i386/intr_stubs.o
 )

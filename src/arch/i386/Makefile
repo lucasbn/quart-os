@@ -1,7 +1,7 @@
 ARCH_ASM_SRCS := intr_stubs.asm
 ARCH_ASM_OBJS := $(addprefix $(ARCH_BUILD)/,$(ARCH_ASM_SRCS:.asm=.o))
 
-ARCH_C_SRCS := console.c interrupt.c
+ARCH_C_SRCS := serial.c interrupt.c
 ARCH_C_OBJS := $(addprefix $(ARCH_BUILD)/,$(ARCH_C_SRCS:.c=.o))
 ARCH_C_DEPS := $(addprefix $(ARCH_BUILD)/,$(ARCH_C_SRCS:.c=.d))
 

@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include "console.h"
 #include "io.h"
+#include "serial.h"
 
 #define PIC0_CTRL	0x20    /* Master PIC control register address. */
 #define PIC0_DATA	0x21    /* Master PIC data register address. */
@@ -48,9 +48,9 @@ void pic_init(void)
 
 void intr_handler(int vector)
 {
-    // if (vector != 0x20) {
-    //     serial_write('b')
-    // }
+    if (vector == 0x20) {
+        serial_write(serial_read());
+    }
 
     if (vector >= 0x20 && vector < 0x30) {
         /* Send End of Interrupt (EOI) signal to PICs. */
