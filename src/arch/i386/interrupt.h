@@ -1,0 +1,1 @@
+void intr_register_handler(int irq, void (*handler)(void));

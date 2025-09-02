@@ -1,5 +1,8 @@
 #include "serial.h"
+#include "interrupt.h"
 #include "io.h"
+
+void serial_interrupt_handler(void);
 
 int serial_init(void) {
    outb(COM1 + 1, 0x00);    // Disable all interrupts
@@ -22,6 +25,8 @@ int serial_init(void) {
    outb(COM1 + 4, 0x0B);    // OUT2 not set, interrupts won't be signaled to PIC
    outb(COM1 + 1, 0x01);    // Enable received data available interrupt
 
+   intr_register_handler(0x24, serial_interrupt_handler);
+
    return 0;
 }
 
@@ -41,4 +46,10 @@ static inline int is_transmit_empty() {
 void serial_write(char c) {
     while (!is_transmit_empty());
     outb(COM1, c);
+}
+
+void serial_interrupt_handler(void) {
+    char c = serial_read();
+    // Handle the received character (e.g., echo it back)
+    serial_write(c);
 }

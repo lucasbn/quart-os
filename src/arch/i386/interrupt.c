@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include "io.h"
-#include "serial.h"
 
 #define PIC0_CTRL	0x20    /* Master PIC control register address. */
 #define PIC0_DATA	0x21    /* Master PIC data register address. */
@@ -22,6 +21,8 @@ struct __attribute__((packed)) IDTROperand {
 
 static struct InterruptDescriptor32 idt[256];
 extern void* isr_stub_table[];
+
+void (*intr_handlers[256])(void);
 
 void pic_init(void)
 {
@@ -48,8 +49,8 @@ void pic_init(void)
 
 void intr_handler(int vector)
 {
-    if (vector == 0x20) {
-        serial_write(serial_read());
+    if (intr_handlers[vector]) {
+        intr_handlers[vector]();
     }
 
     if (vector >= 0x20 && vector < 0x30) {
@@ -72,6 +73,11 @@ void set_idt_gate(int i, void (*isr_addr)(void))
     };
 }
 
+void intr_register_handler(int irq, void (*handler)(void))
+{
+    intr_handlers[irq] = handler;
+}
+
 void intr_init(void)
 {
     /* Initialise PIC */
@@ -79,6 +85,7 @@ void intr_init(void)
 
     for (int i = 0; i < 256; i++) {
         set_idt_gate(i, isr_stub_table[i]);
+        intr_handlers[i] = 0;
     }
 
     /* Load IDT register */
