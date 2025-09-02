@@ -19,11 +19,13 @@ This is an x86 operating system project written in C and assembly. The goal is t
 src/
 ├── arch/i386/           # Architecture-specific code
 │   ├── bootloader/      # BIOS bootloader in assembly
-│   ├── console.c        # Serial I/O implementation
+│   ├── serial.c/h       # Serial I/O implementation
+│   ├── interrupt.c/h    # Interrupt handling
+│   ├── intr_stubs.asm   # Assembly interrupt stubs
 │   └── linker.ld        # Kernel linking script
 ├── kernel/              # Architecture-independent kernel
 │   ├── main.c          # Kernel entry point (kmain)
-│   └── main.h          # Kernel headers
+│   └── main.h          # Kernel headers and utility functions
 scripts/
 ├── run.sh              # QEMU execution script
 build/                  # Build output directory
@@ -61,9 +63,16 @@ build/                  # Build output directory
 - GDT contains null, code (0x08), and data (0x10) segments
 
 ### I/O System
-- Serial console output via `putchar()` and `kprint()`
+- Serial console output via `putchar()` and `kprint()` from kernel/main.h
 - Automatic CR+LF handling for newlines
+- Serial port communication through COM1 (0x3f8)
 - No keyboard input implemented yet
+
+### Interrupt System
+- IDT (Interrupt Descriptor Table) setup in interrupt.c
+- Assembly interrupt stubs in intr_stubs.asm
+- Interrupt handler registration via `intr_register_handler()`
+- Interrupts enabled with `sti` instruction in kernel main loop
 
 ## Development Workflow
 
@@ -73,8 +82,22 @@ build/                  # Build output directory
 4. Debug with GDB: `gdb` then `target remote localhost:1234`
 
 ## Tools and Dependencies
-- **Compiler**: GCC with `-m32 -ffreestanding` flags
-- **Assembler**: NASM for bootloader assembly
-- **Linker**: GNU LD with custom linker script
+- **Compiler**: i686-elf-gcc with `-ffreestanding -O0 -Wall` flags
+- **Assembler**: NASM for assembly files (bootloader and interrupt stubs)
+- **Linker**: i686-elf-ld with custom linker script
 - **Emulator**: QEMU (qemu-system-i386)
 - **Debugger**: GDB for kernel debugging
+- **Object Utility**: i686-elf-objcopy for binary conversion
+
+## Architecture-Specific Implementation Notes
+
+### Bootloader Details
+- Located in `src/arch/i386/bootloader/`
+- Partition table creation via Python script
+- Binary output created via objcopy from ELF
+- Disk layout: bootloader at sector 0, kernel at sector 256
+
+### Kernel Entry Point
+- Entry point is `kmain()` function in kernel/main.c
+- Initializes interrupts (`intr_init()`) and serial I/O (`serial_init()`)
+- Enters infinite loop after enabling interrupts with `sti`
