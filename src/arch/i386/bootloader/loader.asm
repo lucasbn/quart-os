@@ -54,13 +54,43 @@ load_kernel:
     ; Pop the DAP off the stack
     add sp, 16
 
-    ; Switch to protected mode
-    jmp protected_mode
+    ; Use the BIOS to query about the memory layout
+    jmp get_memory_layout
 
 ; Handle disk error (error code stored in AH) by informing BIOS that
 ; the boot failed
 disk_error:
     add sp, 16
+    int 0x18
+
+
+; Get a map of the physical memory
+get_memory_layout:
+    mov ebx, 0
+    mov edx, 0x534D4150
+
+    mov ax, 0x5000
+    mov di, ax
+
+mem_start:
+    mov eax, 0xE820
+    mov ecx, 24
+
+    int 0x15
+    jc memory_error
+
+    mov [memory_map_entries], di
+
+    ; If ebx is 0 then switch to protected mode
+    cmp ebx, 0
+    je protected_mode
+
+    ; Increment di by list entry size
+    add di, 24
+
+    jmp mem_start
+
+memory_error:    
     int 0x18
 
 protected_mode:
@@ -109,9 +139,10 @@ clear_pipe:
     mov fs, ax
     mov gs, ax
 
+    mov ax, [memory_map_entries]
+
     ; Jump to kernel start code
-    mov eax, [0x20018]
-    jmp eax
+    jmp 0x200e0
 
 align 8
 gdt:
@@ -137,3 +168,6 @@ gdt_end:
 gdt_desc:
     dw gdt_end - gdt - 1    ; Limit
     dd gdt                  ; Base address
+
+memory_map_entries:
+    dw 0

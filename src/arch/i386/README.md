@@ -43,3 +43,4 @@ Talk about need to store general purpose registers
 
 Look at chapter 8 of IA32 Vol 3
 
+# Memory Management

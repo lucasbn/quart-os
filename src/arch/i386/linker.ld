@@ -1,8 +1,9 @@
-ENTRY(kmain)
+ENTRY(boot_i386)
 
 INPUT (
     build/kernel/main.o
     
+    build/arch/i386/boot.o
     build/arch/i386/serial.o
     build/arch/i386/interrupt.o
     build/arch/i386/intr_stubs.o
