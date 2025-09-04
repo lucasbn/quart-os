@@ -1,19 +1,23 @@
 #include "main.h"
+#include "kmalloc.h"
 #include <stdint.h>
 
-struct e820_entry {
-    uint64_t base;
-    uint64_t length;
-    uint32_t type;
-    uint32_t padding;
-} __attribute__((packed));
+void kmain() {
 
-void kmain(struct e820_entry *mmap) {
-
+    kmalloc_init();
     intr_init();
     serial_init();
-
     __asm__ volatile ("sti");
+
+    void *ptr = kmalloc(1024);
+    if (ptr == NULL) {
+        kprint("Failed to allocate 1KB");
+    }
+    
+    void *ptr2 = kmalloc(200 * 1024 * 1024);
+    if (ptr2 == NULL) {
+        kprint("Failed to allocate 200MB");
+    }
 
     for (;;) {}
 }

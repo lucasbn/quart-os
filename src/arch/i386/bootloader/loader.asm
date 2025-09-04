@@ -142,7 +142,7 @@ clear_pipe:
     mov ax, [memory_map_entries]
 
     ; Jump to kernel start code
-    jmp 0x200e0
+    jmp 0x201a0
 
 align 8
 gdt:

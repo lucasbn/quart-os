@@ -1,4 +1,4 @@
-KERNEL_SRCS := main.c
+KERNEL_SRCS := main.c kmalloc.c
 KERNEL_OBJS := $(addprefix $(KERNEL_BUILD)/,$(KERNEL_SRCS:.c=.o))
 KERNEL_DEPS := $(addprefix $(KERNEL_BUILD)/,$(KERNEL_SRCS:.c=.d))
 
