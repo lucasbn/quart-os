@@ -1,5 +1,6 @@
 [BITS 16]
 
+global start
 start:
 	sub ax, ax
 	mov ds, ax
@@ -142,7 +143,7 @@ clear_pipe:
     mov ax, [memory_map_entries]
 
     ; Jump to kernel start code
-    jmp 0x201a0
+    jmp [0x20018]
 
 align 8
 gdt:
